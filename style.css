@@ -26,17 +26,23 @@ h1, h2, h3, .logo { font-family: 'Cinzel', serif; }
 .nav-logo { font-family: 'Cinzel', serif; color: var(--gold); letter-spacing: 2px; }
 .nav-user { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text-muted); }
 .nav-user span { color: var(--gold); margin-right: 12px; }
-.nav-user button, .nav-user a { background: transparent; border: 1px solid var(--border-default); color: white; padding: 6px 12px; border-radius: 4px; cursor: pointer; text-decoration: none; }
+.nav-user button, .nav-user a { background: transparent; border: 1px solid var(--border-default); color: white; padding: 6px 12px; border-radius: 4px; cursor: pointer; text-decoration: none; transition: border-color 0.2s ease; }
 .nav-user button:hover, .nav-user a:hover { border-color: var(--gold); }
 
-.btn-primary { background: var(--gold); color: black; font-weight: 600; font-size: 14px; padding: 12px 28px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; }
+.btn-primary { background: var(--gold); color: black; font-weight: 600; font-size: 14px; padding: 12px 28px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; transition: background-color 0.2s ease; }
 .btn-primary:hover { background: var(--gold-dark); }
-.btn-secondary { background: transparent; border: 1px solid var(--border-default); color: white; font-weight: 600; font-size: 14px; padding: 12px 28px; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; }
+.btn-secondary { background: transparent; border: 1px solid var(--border-default); color: white; font-weight: 600; font-size: 14px; padding: 12px 28px; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; transition: background-color 0.2s ease, border-color 0.2s ease; }
+.btn-secondary:hover { border-color: var(--gold); background: rgba(201,162,39,0.08); }
 
-.hero { min-height: calc(100vh - 60px); display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle at center, #0E1D3E 0%, var(--bg-primary) 70%); text-align: center; }
+.hero { min-height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle at center, #0E1D3E 0%, var(--bg-primary) 70%); text-align: center; padding: 40px 20px; }
 .hero-title { font-size: 48px; font-weight: 700; color: var(--gold); text-shadow: 0 0 40px rgba(201,162,39,0.3); margin-bottom: 16px; }
 .hero-subtitle { font-size: 16px; color: var(--text-muted); max-width: 500px; line-height: 1.5; margin-bottom: 32px; }
 .cta-group { display: flex; gap: 16px; justify-content: center; }
+
+.tier-preview { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1000px; margin: 40px auto; padding: 0 24px; }
+.tier-card { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 10px; padding: 24px; text-align: center; }
+.tier-card h3 { color: var(--gold); font-size: 18px; margin-bottom: 12px; letter-spacing: 1px; }
+.tier-card p { color: var(--text-muted); font-size: 13px; line-height: 1.6; }
 
 .auth-wrap { min-height: calc(100vh - 60px); display: flex; justify-content: center; align-items: center; background: var(--bg-primary); }
 .auth-card { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 14px; padding: 32px; width: 100%; max-width: 380px; }
@@ -54,7 +60,7 @@ h1, h2, h3, .logo { font-family: 'Cinzel', serif; }
 
 .tier-badge { display: inline-block; border-radius: 4px; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 3px 10px; font-weight: 600; margin-bottom: 12px; }
 .tier-badge.easy { background: rgba(26,90,48,0.2); color: #2ECC71; border: 1px solid var(--tier-easy); }
-.tier-badge.medium { background: rgba(243,156,18,0.2); color: #F1C40F; border: 1px solid var(--tier-medium); }
+.tier-badge.medium { background: rgba(243,156,18,0.2); color: var(--tier-medium); border: 1px solid var(--tier-medium); }
 .tier-badge.hard { background: rgba(192,57,43,0.2); color: #E74C3C; border: 1px solid var(--tier-hard); }
 
 .question-card { background: rgba(10,20,50,0.8); border: 1px solid var(--border-default); border-radius: 10px; padding: 24px; }
@@ -70,7 +76,7 @@ h1, h2, h3, .logo { font-family: 'Cinzel', serif; }
 
 .lifelines-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
 .ll-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
-.lifeline-btn { background: rgba(10,20,50,0.6); border: 1px solid var(--border-default); border-radius: 6px; padding: 6px 12px; color: #7A9FD4; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.lifeline-btn { background: rgba(10,20,50,0.6); border: 1px solid var(--border-default); border-radius: 6px; padding: 6px 12px; color: #7A9FD4; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: border-color 0.2s ease; }
 .lifeline-btn:hover { border-color: var(--gold); }
 .lifeline-btn.used { opacity: 0.35; text-decoration: line-through; cursor: not-allowed; pointer-events: none; }
 
@@ -110,6 +116,7 @@ h1, h2, h3, .logo { font-family: 'Cinzel', serif; }
 @media (max-width: 768px) {
   .game-layout { grid-template-columns: 1fr; height: auto; }
   .game-sidebar { border-left: none; border-top: 1px solid var(--border-default); }
+  .tier-preview { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
   .answers-grid { grid-template-columns: 1fr; }
