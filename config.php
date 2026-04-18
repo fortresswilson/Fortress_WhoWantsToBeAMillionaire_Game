@@ -162,3 +162,58 @@ function get_sorted_scores(): array {
     return $ranked;
 }
 
+// ── AI Advisor — Anthropic API curl call ─────────────────────
+// Returns a 2-3 sentence reasoning HINT (never the answer)
+function get_ai_hint(string $question_text, array $visible_options): string {
+    $api_key = getenv('ANTHROPIC_API_KEY');
+
+    // Graceful fallback if key not configured
+    if (!$api_key) {
+        return 'Think carefully about each option. Eliminate answers you are confident are wrong before committing.';
+    }
+
+    // Build options list for the prompt
+    $opts_text = '';
+    foreach ($visible_options as $i => $opt) {
+        $opts_text .= chr(65 + $i) . ') ' . $opt['text'] . "\n";
+    }
+
+    $prompt = "You are an AI Advisor in a Who Wants to Be a Millionaire game. "
+            . "A player is stuck on this question:\n\n"
+            . "QUESTION: {$question_text}\n\n"
+            . "OPTIONS:\n{$opts_text}\n"
+            . "Give the player a 2-3 sentence reasoning HINT that guides their thinking "
+            . "WITHOUT revealing the correct answer. Focus on the concept being tested. "
+            . "Be encouraging and analytical.";
+
+    $payload = json_encode([
+        'model'      => 'claude-sonnet-4-6',
+        'max_tokens' => 200,
+        'messages'   => [['role' => 'user', 'content' => $prompt]],
+    ]);
+
+    $ch = curl_init('https://api.anthropic.com/v1/messages');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => $payload,
+        CURLOPT_HTTPHEADER     => [
+            'Content-Type: application/json',
+            'x-api-key: ' . $api_key,
+            'anthropic-version: 2023-06-01',
+        ],
+        CURLOPT_TIMEOUT        => 15,
+    ]);
+
+    $response = curl_exec($ch);
+    $err      = curl_error($ch);
+    curl_close($ch);
+
+    if ($err || !$response) {
+        return 'Think carefully about each option. Eliminate answers you are confident are wrong before committing.';
+    }
+
+    $data = json_decode($response, true);
+    return $data['content'][0]['text']
+        ?? 'Think carefully about each option. Eliminate answers you are confident are wrong before committing.';
+}
