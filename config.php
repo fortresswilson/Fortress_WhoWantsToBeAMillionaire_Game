@@ -118,3 +118,47 @@ function verify_user(string $username, string $password): bool {
     return password_verify($password, $_SESSION['users'][$key]['password_hash']);
 }
 
+// ── Leaderboard ───────────────────────────────────────────────
+// $_SESSION['scores'][username] = [
+//   'best_prize'   => '$32,000',
+//   'best_level'   => 10,
+//   'games_played' => 3,
+// ]
+
+function update_leaderboard(string $username, string $prize, int $level_reached): void {
+    if (!isset($_SESSION['scores'])) {
+        $_SESSION['scores'] = [];
+    }
+    $prev = $_SESSION['scores'][$username] ?? [
+        'best_prize'   => '$0',
+        'best_level'   => 0,
+        'games_played' => 0,
+    ];
+
+    // Only update best if this game beat the previous record
+    if ($level_reached > $prev['best_level']) {
+        $prev['best_prize'] = $prize;
+        $prev['best_level'] = $level_reached;
+    }
+    $prev['games_played']++;
+    $_SESSION['scores'][$username] = $prev;
+}
+
+// Returns array indexed from 1, sorted by best_level desc
+function get_sorted_scores(): array {
+    $scores = $_SESSION['scores'] ?? [];
+    uasort($scores, function ($a, $b) {
+        if ($b['best_level'] !== $a['best_level']) {
+            return $b['best_level'] - $a['best_level'];
+        }
+        return $a['games_played'] - $b['games_played'];
+    });
+    $ranked = [];
+    $rank   = 1;
+    foreach ($scores as $username => $data) {
+        $ranked[$rank] = array_merge(['username' => $username], $data);
+        $rank++;
+    }
+    return $ranked;
+}
+
