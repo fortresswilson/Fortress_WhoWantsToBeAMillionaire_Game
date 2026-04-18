@@ -45,7 +45,178 @@ if (empty($_SESSION['questions'])) {
     $_SESSION['show_ai_panel']  = false;
 }
 
+// ── Handle POST ───────────────────────────────────────────────
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
+    // ── Lifeline activation ──────────────────────────────────
+    if (isset($_POST['lifeline'])) {
+        $lifeline = trim(filter_input(INPUT_POST, 'lifeline', FILTER_SANITIZE_SPECIAL_CHARS) ?? '');
+        $allowed  = ['fifty_fifty', 'walk_away', 'ai_advisor'];
+
+        if (in_array($lifeline, $allowed, true)) {
+
+            switch ($lifeline) {
+
+                // ── 50:50 ────────────────────────────────────
+                // server picks 2 wrong indices at random,
+                // stores in $_SESSION['eliminated'], frontend applies .eliminated class
+                case 'fifty_fifty':
+                    if (!$_SESSION['lifelines']['fifty_fifty']) {
+                        $_SESSION['lifelines']['fifty_fifty'] = true;
+                        $q_index     = $_SESSION['current_level'] - 1;
+                        $question    = $_SESSION['questions'][$q_index];
+                        $correct_idx = $question['correct_index'];
+
+                        // Pick 2 wrong indices to eliminate
+                        $wrong = [];
+                        for ($i = 0; $i < 4; $i++) {
+                            if ($i !== $correct_idx) $wrong[] = $i;
+                        }
+                        shuffle($wrong);
+                        $_SESSION['eliminated'] = array_slice($wrong, 0, 2);
+                    }
+                    break;
+
+                //  Walk Away: banks safe-haven prize (get_banked_prize),
+                // updates leaderboard, sets outcome='walk', PRG to results.php
+                // ── Walk Away ────────────────────────────────
+                case 'walk_away':
+                    if (!$_SESSION['lifelines']['walk_away']) {
+                        $_SESSION['lifelines']['walk_away'] = true;
+                        $level  = $_SESSION['current_level'];
+                        $banked = get_banked_prize($level);
+
+                        update_leaderboard(
+                            $_SESSION['username'],
+                            $banked,
+                            prize_to_int($banked)
+                        );
+
+                        $_SESSION['outcome']        = 'walk';
+                        $_SESSION['final_prize']    = $banked;
+                        $_SESSION['correct_answer'] = '';
+
+                        unset(
+                            $_SESSION['questions'],
+                            $_SESSION['eliminated'],
+                            $_SESSION['ai_hint_cache'],
+                            $_SESSION['show_ai_panel']
+                        );
+
+                        header('Location: results.php');
+                        exit;
+                    }
+                    break;
+
+            }
+        }
+
+        // PRG — reload game page after any lifeline
+        header('Location: game.php');
+        exit;
+    }
+
+        // SPRINT 3: PRG pattern — every answer POST immediately redirects (GET)
+    // Prevents double-submission on refresh. $_SESSION updated before redirect.
+    // ── Answer submission ────────────────────────────────────
+    if (isset($_POST['answer_index'])) {
+        $answer_index = (int) filter_input(INPUT_POST, 'answer_index', FILTER_SANITIZE_NUMBER_INT);
+        $level        = $_SESSION['current_level'];
+        $q_index      = $level - 1;
+        $question     = $_SESSION['questions'][$q_index];
+        $correct_idx  = $question['correct_index'];
+
+        // Clear per-question state on every submission
+        $_SESSION['show_ai_panel'] = false;
+        $_SESSION['ai_hint_cache'] = '';
+        $_SESSION['eliminated']    = [];
+
+        if ($answer_index === $correct_idx) {
+
+            // ── CORRECT ──────────────────────────────────────
+            if ($level === 15) {
+                // WIN — reached top of the ladder
+                $prize = PRIZE_LADDER[15];
+                update_leaderboard($_SESSION['username'], $prize, prize_to_int($prize));
+
+                $_SESSION['outcome']        = 'win';
+                $_SESSION['final_prize']    = $prize;
+                $_SESSION['correct_answer'] = '';
+
+                unset(
+                    $_SESSION['questions'],
+                    $_SESSION['eliminated'],
+                    $_SESSION['ai_hint_cache'],
+                    $_SESSION['show_ai_panel']
+                );
+
+                header('Location: results.php');
+                exit;
+            }
+
+            // Advance to next level
+            $next = $level + 1;
+            $tmap = TIER_MAP;
+            $tier = get_tier_for_level($next);
+
+            $_SESSION['current_level'] = $next;
+            $_SESSION['current_prize'] = PRIZE_LADDER[$next];
+            $_SESSION['tier_class']    = $tmap[$tier]['class'];
+            $_SESSION['tier_label']    = $tmap[$tier]['label'];
+
+            // PRG — reload with updated session
+            header('Location: game.php');
+            exit;
+
+        } else {
+
+            // ── WRONG ────────────────────────────────────────
+            $banked = get_banked_prize($level);
+            update_leaderboard($_SESSION['username'], $banked, prize_to_int($banked));
+
+            $_SESSION['outcome']        = 'loss';
+            $_SESSION['final_prize']    = $banked;
+            $_SESSION['correct_answer'] = $question['options'][$correct_idx];
+
+            unset(
+                $_SESSION['questions'],
+                $_SESSION['eliminated'],
+                $_SESSION['ai_hint_cache'],
+                $_SESSION['show_ai_panel']
+            );
+
+            header('Location: results.php');
+            exit;
+        }
+    }
+
+    // Catch-all for malformed POST
+    header('Location: game.php');
+    exit;
+}
+
+// ── GET: prepare view variables ───────────────────────────────
+$level         = $_SESSION['current_level'];
+$q_index       = $level - 1;
+$question      = $_SESSION['questions'][$q_index];
+$question_text = $question['text'];
+
+// Build $answers array — frontend iterates over this
+$answers = [];
+foreach ($question['options'] as $i => $opt) {
+    $answers[$i] = [
+        'text'       => $opt,
+        'eliminated' => in_array($i, $_SESSION['eliminated'] ?? []),
+    ];
+}
+
+$show_ai_panel = (bool) ($_SESSION['show_ai_panel'] ?? false);
+$ai_hint       = (string)($_SESSION['ai_hint_cache']  ?? '');
+$prize_ladder  = PRIZE_LADDER;
+
+// ── Render — include header then frontend HTML shell ──────────
+require_once 'header.php';
+?>
 
 <main class="game-layout">
   <section class="game-main">
