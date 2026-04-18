@@ -41,6 +41,24 @@ switch ($outcome) {
 $final_prize         = $_SESSION['final_prize']    ?? '$0';
 $correct_answer_text = $_SESSION['correct_answer'] ?? '';
 
+// Clean up game-specific keys — preserve username + users + scores
+unset(
+    $_SESSION['outcome'],
+    $_SESSION['final_prize'],
+    $_SESSION['correct_answer'],
+    $_SESSION['current_level'],
+    $_SESSION['current_prize'],
+    $_SESSION['tier_class'],
+    $_SESSION['tier_label'],
+    $_SESSION['lifelines'],
+    $_SESSION['questions'],
+    $_SESSION['eliminated'],
+    $_SESSION['ai_hint_cache'],
+    $_SESSION['show_ai_panel']
+);
+
+require_once 'header.php';
+?>
 
 <main class="result-wrap">
   <div class="result-icon">
