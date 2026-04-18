@@ -108,6 +108,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                     break;
 
+                //  — AI Advisor: PHP curl POST to Anthropic API,
+                // passes question + visible options, receives 2-3 sentence hint,
+                // stored in $_SESSION['ai_hint_cache'], shown via $show_ai_panel
+                // Tracked in $_SESSION['lifelines']['ai_advisor'] — one use per game
+                // ── AI Advisor ───────────────────────────────
+                case 'ai_advisor':
+                    if (!$_SESSION['lifelines']['ai_advisor']) {
+                        $_SESSION['lifelines']['ai_advisor'] = true;
+
+                        $q_index  = $_SESSION['current_level'] - 1;
+                        $question = $_SESSION['questions'][$q_index];
+
+                        // Build visible options (respects 50:50 elimination)
+                        $visible = [];
+                        foreach ($question['options'] as $i => $opt) {
+                            if (!in_array($i, $_SESSION['eliminated'] ?? [])) {
+                                $visible[$i] = ['text' => $opt];
+                            }
+                        }
+
+                        $_SESSION['ai_hint_cache'] = get_ai_hint($question['text'], $visible);
+                        $_SESSION['show_ai_panel'] = true;
+                    }
+                    break;
             }
         }
 
