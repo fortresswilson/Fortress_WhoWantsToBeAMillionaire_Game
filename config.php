@@ -78,3 +78,43 @@ function get_ladder_class(int $lvl): string {
     return 'future';
 }
 
+// ── Auth guard ────────────────────────────────────────────────
+// Call at the very top of every protected page
+function require_login(): void {
+    if (!isset($_SESSION['username'])) {
+        header('Location: login.php');
+        exit;
+    }
+}
+
+// ── User store ────────────────────────────────────────────────
+// Flat session-based store — no database required
+// $_SESSION['users'][lowercase_username] = [
+//   'display'       => string  (original casing),
+//   'email'         => string,
+//   'password_hash' => string  (bcrypt),
+// ]
+
+function user_exists(string $username): bool {
+    return isset($_SESSION['users'][strtolower(trim($username))]);
+}
+
+function register_user(string $username, string $email, string $password): void {
+    if (!isset($_SESSION['users'])) {
+        $_SESSION['users'] = [];
+    }
+    $_SESSION['users'][strtolower(trim($username))] = [
+        'display'       => $username,
+        'email'         => strtolower(trim($email)),
+        'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+    ];
+}
+
+function verify_user(string $username, string $password): bool {
+    $key = strtolower(trim($username));
+    if (!isset($_SESSION['users'][$key])) {
+        return false;
+    }
+    return password_verify($password, $_SESSION['users'][$key]['password_hash']);
+}
+
