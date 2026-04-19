@@ -36,7 +36,22 @@ define('TIER_MAP', [
     'medium' => ['class' => 'medium', 'label' => 'Technology & CS Concepts'],
     'hard'   => ['class' => 'hard',   'label' => 'LeetCode Algorithm Tier'],
 ]);
+define('USERS_FILE',  __DIR__ . '/data/users.json');
+define('SCORES_FILE', __DIR__ . '/data/scores.json');
 
+function load_json(string $path): array {
+    if (!file_exists($path)) return [];
+    $raw = file_get_contents($path);
+    return json_decode($raw, true) ?? [];
+}
+
+function save_json(string $path, array $data): void {
+    $dir = dirname($path);
+    if (!is_dir($dir)) {
+        mkdir($dir, 0755, true);
+    }
+    file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT), LOCK_EX);
+}
 // ── Tier for Level ────────────────────────────────────────────
 function get_tier_for_level(int $level): string {
     if ($level <= 5)  return 'easy';
