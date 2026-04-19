@@ -6,7 +6,7 @@
 // ============================================================
 session_start();
 require_once 'config.php';
-
+g
 // Redirect already-authenticated users straight to the game
 if (isset($_SESSION['username'])) {
     header('Location: game.php');
