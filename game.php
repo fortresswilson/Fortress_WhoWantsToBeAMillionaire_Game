@@ -187,6 +187,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['current_prize'] = PRIZE_LADDER[$next];
             $_SESSION['tier_class']    = $tmap[$tier]['class'];
             $_SESSION['tier_label']    = $tmap[$tier]['label'];
+             $_SESSION['correct_answer_flag'] = true;
 
             // PRG — reload with updated session
             header('Location: game.php');
@@ -195,6 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
 
             // ── WRONG ────────────────────────────────────────
+             $_SESSION['wrong_answer'] = true;
             $banked = get_banked_prize($level);
             update_leaderboard($_SESSION['username'], $banked, prize_to_int($banked));
 
@@ -243,6 +245,15 @@ require_once 'header.php';
 ?>
 
 <main class="game-layout">
+   <?php if (!empty($_SESSION['wrong_answer'])): unset($_SESSION['wrong_answer']); ?>
+  <audio autoplay src="sounds/wrong.mp3"></audio>
+  <style>.question-card { animation: shake 0.6s ease-in-out; }</style>
+<?php endif; ?>
+
+<?php if (!empty($_SESSION['correct_answer_flag'])): unset($_SESSION['correct_answer_flag']); ?>
+  <audio autoplay src="sounds/correct.mp3"></audio>
+  <style>.question-card { animation: pulse 0.5s ease-in-out; }</style>
+<?php endif; ?>
   <section class="game-main">
 
     <div>
