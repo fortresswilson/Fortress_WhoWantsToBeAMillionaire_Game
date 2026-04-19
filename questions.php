@@ -347,9 +347,10 @@ function get_question_bank(): array {
 function build_game_pool(): array {
     $bank = get_question_bank();
 
-    $easy   = array_values(array_filter($bank, fn($q) => $q['tier'] === 'easy'));
-    $medium = array_values(array_filter($bank, fn($q) => $q['tier'] === 'medium'));
-    $hard   = array_values(array_filter($bank, fn($q) => $q['tier'] === 'hard'));
+    // Use standard anonymous functions for broader server compatibility
+    $easy   = array_values(array_filter($bank, function($q) { return $q['tier'] === 'easy'; }));
+    $medium = array_values(array_filter($bank, function($q) { return $q['tier'] === 'medium'; }));
+    $hard   = array_values(array_filter($bank, function($q) { return $q['tier'] === 'hard'; }));
 
     shuffle($easy);
     shuffle($medium);
