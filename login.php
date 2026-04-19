@@ -25,10 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $login_error = 'Please enter both your username and password.';
     } elseif (!verify_user($username, $password)) {
         $login_error = 'Incorrect username or password. Please try again.';
-    } else {
+      } else {
         // ── Successful login ─────────────────────────────
-        session_regenerate_id(true);          // prevent session fixation
+        session_regenerate_id();              // Remove 'true'
         $_SESSION['username'] = $username;    // key the frontend reads
+        session_write_close();                // Force PHP to save the session before redirecting
         header('Location: game.php');
         exit;
     }
@@ -40,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Who Wants to Be a Millionaire | Sign In</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
